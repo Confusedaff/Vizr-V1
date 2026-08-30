@@ -1,0 +1,164 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: aiviz
+      POSTGRES_USER: aiviz
+      POSTGRES_PASSWORD: aiviz
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./infrastructure/docker/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aiviz"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY:-aiviz_minio_admin}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:-aiviz_minio_secret}
+    ports:
+      - "9000:9000"   # S3 API
+      - "9001:9001"   # Web console
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # One-shot job: creates the video bucket on first startup so the API/
+  # worker never race against an uninitialized MinIO. Runs to completion
+  # and exits — `docker compose up` will show it as "exited (0)", which
+  # is expected, not a failure.
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 ${S3_ACCESS_KEY:-aiviz_minio_admin} ${S3_SECRET_KEY:-aiviz_minio_secret} &&
+      mc mb --ignore-existing local/${S3_BUCKET:-aiviz-videos}
+      "
+
+  api:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile
+    command: ["uvicorn", "apps.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    environment:
+      DATABASE_URL: postgresql+asyncpg://aiviz:aiviz@db:5432/aiviz
+      REDIS_URL: redis://redis:6379/0
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:?Set JWT_SECRET_KEY in .env before starting}
+      S3_ENDPOINT_URL: http://minio:9000
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-aiviz_minio_admin}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-aiviz_minio_secret}
+      S3_BUCKET: ${S3_BUCKET:-aiviz-videos}
+      # Operator-level fallback key (optional). Leave unset to require
+      # every request to supply its own key, per the per-user-key design.
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    ports:
+      - "8000:8000"
+    volumes:
+      - debug_runs:/app/debug_runs
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+
+  worker:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile
+    command: ["celery", "-A", "workers.celery_app", "worker", "--loglevel=info", "--concurrency=2"]
+    environment:
+      DATABASE_URL: postgresql+asyncpg://aiviz:aiviz@db:5432/aiviz
+      REDIS_URL: redis://redis:6379/0
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:?Set JWT_SECRET_KEY in .env before starting}
+      S3_ENDPOINT_URL: http://minio:9000
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-aiviz_minio_admin}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-aiviz_minio_secret}
+      S3_BUCKET: ${S3_BUCKET:-aiviz-videos}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      # "docker" enables per-render Docker-sandbox isolation (see
+      # manim_engine/renderer/sandbox.py); requires the host's Docker
+      # socket to be mounted below (Docker-outside-of-Docker) and the
+      # aiviz-sandbox image built (see sandbox-image-builder service).
+      # Falls back to "subprocess" automatically if the socket/image
+      # aren't available — see render.py's dispatch logic.
+      SANDBOX_MODE: ${SANDBOX_MODE:-docker}
+    volumes:
+      - debug_runs:/app/debug_runs
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+      sandbox-image-builder:
+        condition: service_completed_successfully
+    # Renders are CPU-bound (Cairo/Pango rasterization); scale this
+    # service horizontally (docker compose up --scale worker=3) rather
+    # than raising concurrency indefinitely on one instance.
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 2G
+
+  # One-shot job: builds the aiviz-sandbox image (used by
+  # manim_engine/renderer/sandbox.py) so the worker never races against
+  # a missing image on first startup. Requires the Docker socket to run
+  # `docker build` against the host's Docker daemon (Docker-outside-of-
+  # Docker) — this is the same daemon the worker's sandbox.py later calls
+  # `docker run` against, so images built here are visible to it.
+  sandbox-image-builder:
+    image: docker:27-cli
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - .:/build:ro
+    working_dir: /build
+    entrypoint: >
+      /bin/sh -c "
+      docker build -f infrastructure/docker/Dockerfile.sandbox -t aiviz-sandbox:latest .
+      "
+
+  web:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.web
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000}
+    ports:
+      - "5173:80"
+    depends_on:
+      - api
+
+volumes:
+  pg_data:
+  debug_runs:
+  minio_data:

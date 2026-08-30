@@ -1,0 +1,19 @@
+.video-player {
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.video-player__el {
+  width: 100%;
+  display: block;
+  background: #000;
+}
+
+.video-player__expired {
+  padding: 12px 16px;
+  color: var(--danger);
+  font-size: 12px;
+  margin: 0;
+}

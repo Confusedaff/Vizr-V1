@@ -1,0 +1,63 @@
+.manual-scene {
+  background: var(--bg-raised);
+  border: 1px solid var(--secondary);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.manual-scene__explainer {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.manual-scene__explainer code {
+  background: var(--bg-inset);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+.manual-scene__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.manual-scene__field textarea {
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  color: var(--text-primary);
+  font-size: 12px;
+  resize: vertical;
+}
+
+.manual-scene__error {
+  color: var(--danger);
+  font-size: 12px;
+  margin: 0;
+}
+
+.manual-scene__submit {
+  background: var(--secondary);
+  color: #241a02;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 10px 20px;
+  font-weight: 600;
+  font-size: 13px;
+  align-self: flex-start;
+}
+
+.manual-scene__submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

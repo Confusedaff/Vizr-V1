@@ -1,0 +1,24 @@
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 60px 20px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+
+.empty-state__glyph {
+  color: var(--text-faint);
+  font-size: 20px;
+  margin: 0;
+}
+
+.empty-state__text {
+  color: var(--text-faint);
+  font-size: 13px;
+  max-width: 340px;
+  margin: 0;
+}

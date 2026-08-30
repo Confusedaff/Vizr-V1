@@ -1,0 +1,123 @@
+.job-form {
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+}
+
+.job-form__tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-inset);
+  border-radius: var(--radius-md);
+  padding: 3px;
+  margin-bottom: 16px;
+  width: fit-content;
+}
+
+.job-form__tab {
+  background: none;
+  border: none;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  color: var(--text-faint);
+  font-weight: 500;
+  font-size: 12px;
+}
+
+.job-form__tab--active {
+  background: var(--bg-raised);
+  color: var(--text-primary);
+}
+
+.job-form__body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.job-form__prompt {
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: var(--font-body);
+  resize: vertical;
+}
+
+.job-form__prompt:focus {
+  border-color: var(--highlight);
+}
+
+.job-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.job-form__field input,
+.job-form__field select {
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.job-form__apikey-toggle {
+  background: none;
+  border: none;
+  color: var(--text-faint);
+  font-size: 11px;
+  font-family: var(--font-mono);
+  padding: 2px 0;
+}
+
+.job-form__apikey-toggle:hover {
+  color: var(--text-muted);
+}
+
+.job-form__apikey-input {
+  margin-top: 6px;
+  width: 100%;
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: var(--font-mono);
+}
+
+.job-form__error {
+  color: var(--danger);
+  font-size: 12px;
+  margin: 0;
+}
+
+.job-form__submit {
+  background: var(--highlight);
+  color: #051224;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  font-weight: 600;
+  font-size: 13px;
+  align-self: flex-start;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.job-form__submit:hover {
+  opacity: 0.9;
+}
+
+.job-form__submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

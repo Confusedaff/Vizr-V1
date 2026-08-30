@@ -1,0 +1,111 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap");
+
+/* Design tokens — deliberately reuse the exact palette from
+   manim_engine/renderer/config.py so the product's own chrome visually
+   rhymes with the videos it produces: this isn't a generic dark theme,
+   it's the render's palette, worn by the tool that makes the renders. */
+:root {
+  --bg: #0e1116;
+  --bg-raised: #151a22;
+  --bg-inset: #0a0d11;
+  --cell-fill: #1b2230;
+  --cell-stroke: #3d4a5c;
+  --border: #262d3a;
+  --border-subtle: #1b212b;
+
+  --text-primary: #f5f7fa;
+  --text-muted: #9aa5b1;
+  --text-faint: #5c6672;
+
+  --highlight: #4c9aff;
+  --success: #3fb950;
+  --danger: #f85149;
+  --neutral: #3d4a5c;
+  --secondary: #d29922;
+
+  --font-display: "Space Grotesk", "Inter", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", Consolas, monospace;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  height: 100%;
+}
+
+a {
+  color: inherit;
+}
+
+button, input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* Visible keyboard focus everywhere, no exceptions — per the frontend
+   design skill's quality floor. */
+:focus-visible {
+  outline: 2px solid var(--highlight);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--highlight);
+  color: var(--bg);
+}
+
+code, .mono {
+  font-family: var(--font-mono);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--cell-stroke);
+}

@@ -1,0 +1,54 @@
+# Sandbox image used to run a single Scene render in complete isolation
+# from the API/worker process. Distinct from infrastructure/docker/Dockerfile
+# (which builds the API/worker themselves) — this image is invoked
+# per-render via `docker run` by manim_engine/renderer/sandbox.py, not
+# run as a long-lived service.
+#
+# Isolation properties this image + its `docker run` invocation together
+# provide (see sandbox.py for the exact flags):
+#   - No network access (--network=none): a render cannot exfiltrate data
+#     or call out anywhere, even if some future code path allowed richer
+#     Manim scripting than today's schema-driven one.
+#   - Read-only root filesystem except an explicit /output mount: nothing
+#     the render does can persist or affect anything outside that one
+#     video file.
+#   - Non-root user: even a full container-escape-free code execution
+#     inside the container can't do anything requiring root.
+#   - CPU/memory/pids limits: a pathological render (e.g. Manim entering
+#     an infinite loop, or a resource-exhaustion bug) can't starve the
+#     host or other containers.
+#   - No new privileges, all capabilities dropped.
+FROM python:3.12-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libcairo2 \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    ffmpeg \
+    fonts-dejavu \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN useradd --create-home --shell /bin/false sandboxuser
+
+WORKDIR /app
+
+COPY requirements.txt .
+# Sandbox only ever needs to import+run a Scene — no fastapi/celery/boto3
+# inside the isolation boundary reduces both image size and attack
+# surface (a render process has no business making an S3 call itself;
+# that happens after the sandboxed process exits and the video file is
+# handed back to the uploading worker).
+RUN pip install --no-cache-dir manim==0.21.0 pydantic==2.13.4 numpy==2.4.4
+
+COPY packages/ ./packages/
+COPY manim_engine/ ./manim_engine/
+
+RUN mkdir -p /output && chown sandboxuser:sandboxuser /output
+RUN chown -R sandboxuser:sandboxuser /app
+
+USER sandboxuser
+ENV PYTHONPATH=/app
+ENV PYTHONUNBUFFERED=1
+ENV MPLCONFIGDIR=/tmp/matplotlib
+
+ENTRYPOINT ["python3", "-m", "manim_engine.renderer.sandbox_entrypoint"]
