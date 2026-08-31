@@ -82,8 +82,30 @@
   color: var(--text-muted);
 }
 
+.job-form__apikey-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 12px;
+  background: var(--bg-inset);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+}
+
+.job-form__apikey-link {
+  font-size: 11px;
+  color: var(--highlight);
+  text-decoration: none;
+  width: fit-content;
+}
+
+.job-form__apikey-link:hover {
+  text-decoration: underline;
+}
+
 .job-form__apikey-input {
-  margin-top: 6px;
+  margin-top: 0;
   width: 100%;
   background: var(--bg-inset);
   border: 1px solid var(--border);

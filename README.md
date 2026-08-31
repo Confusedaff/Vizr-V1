@@ -76,7 +76,8 @@ manim_engine/
                                (granular per-stage debug artifacts).
 
 workers/
-  llm/client.py                Anthropic API wrapper. Per-request user API
+  llm/client.py                Multi-provider LLM wrapper (Groq default,
+                                Gemini, Anthropic). Per-request user API
                                 keys, operator env-var fallback, no shared
                                 default — pipeline pauses for manual input
                                 if neither is present.
@@ -141,7 +142,7 @@ cat debug_runs/demo1/manifest.json
 
 ```bash
 cp .env.example .env
-# edit .env: set JWT_SECRET_KEY (openssl rand -hex 32), optionally ANTHROPIC_API_KEY
+# edit .env: set JWT_SECRET_KEY (openssl rand -hex 32), optionally GROQ_API_KEY
 docker compose up --build
 ```
 
@@ -162,14 +163,35 @@ Every job, debug endpoint, and WebSocket connection is scoped to the
 authenticated user — accessing another user's job returns 404, not 403,
 so existence isn't leaked either.
 
-### With an LLM key (natural-language prompts)
+### Getting a free LLM API key (for local development)
 
-Per-request keys are the intended usage pattern — pass `api_key` in the
-request body (or the frontend's "Anthropic API key" field). An operator
-can also set `ANTHROPIC_API_KEY` as a deployment-wide fallback. If neither
-is present, the job pauses at `needs_manual_input` rather than failing
-silently, and can be resumed via `POST /jobs/{id}/manual-scene` with
-hand-written steps.
+The classify and plan-scene stages need an LLM. Three providers are
+supported; **Groq is the default** because it's the fastest to set up:
+
+| Provider | Free tier | Setup time | Get a key |
+|---|---|---|---|
+| **Groq** (default) | Yes, generous, no credit card | ~30 seconds | [console.groq.com/keys](https://console.groq.com/keys) — sign in with Google/GitHub, click "Create API Key" |
+| **Gemini** | Yes, no credit card | ~1 minute | [aistudio.google.com/apikey](https://aistudio.google.com/apikey) — sign in with a Google account, click "Create API key" |
+| Anthropic | No free tier | — | [console.anthropic.com/settings/keys](https://console.anthropic.com/settings/keys) |
+
+**Fastest path while developing**: paste your key into `.env` as
+`GROQ_API_KEY=gsk_...` (or `GEMINI_API_KEY=...`) before `docker compose up`
+— every job then uses it automatically with no per-request key needed.
+This is an operator-level fallback meant for your own local development,
+not something you'd leave set in a real shared deployment.
+
+**Per-request path** (what end users of a real deployment see): the
+frontend's job-creation form has a "LLM provider & API key" section where
+anyone can pick Groq/Gemini/Anthropic and paste their own key for that
+one request — nothing server-side is required, and the key is only sent
+with that job's request, never stored server-side. The frontend also
+remembers your choice per-provider in the browser's local storage so you
+don't have to re-paste it every time while testing locally.
+
+If neither a per-request key nor an operator fallback is available, the
+job pauses at `needs_manual_input` and can be resumed via
+`POST /jobs/{id}/manual-scene` with hand-written steps instead of failing
+outright.
 
 ## Debugging — granular, at every layer
 

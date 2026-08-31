@@ -3,21 +3,31 @@ which is the *rendering* contract. These are the *HTTP* contract."""
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
 from apps.api.models.db import JobStatus
 from packages.scene_schema import VISUALIZATION_TYPES
 
+LLMProvider = Literal["groq", "gemini", "anthropic"]
+
 
 class CreateJobFromPromptRequest(BaseModel):
     prompt: str = Field(min_length=1, max_length=2000)
+    provider: LLMProvider | None = Field(
+        default=None,
+        description="Which LLM provider to use for this request: 'groq' "
+        "(default), 'gemini', or 'anthropic'. If omitted, uses the "
+        "server's LLM_PROVIDER default (groq unless configured otherwise).",
+    )
     api_key: str | None = Field(
         default=None,
-        description="Optional per-request Anthropic API key. If omitted, "
-        "the server falls back to any operator-configured key, and if "
-        "none is available, the job will pause with status "
-        "'needs_manual_input' at the classify stage.",
+        description="Optional per-request API key for the chosen provider. "
+        "If omitted, the server falls back to that provider's "
+        "operator-configured key (GROQ_API_KEY / GEMINI_API_KEY / "
+        "ANTHROPIC_API_KEY), and if none is available, the job will pause "
+        "with status 'needs_manual_input' at the classify stage.",
     )
 
 
@@ -25,6 +35,7 @@ class CreateJobFromManualRequest(BaseModel):
     visualization_type: str = Field(description=f"One of {VISUALIZATION_TYPES}")
     input: dict = Field(default_factory=dict)
     title: str = Field(default="Visualization", max_length=100)
+    provider: LLMProvider | None = None
     api_key: str | None = None
 
 

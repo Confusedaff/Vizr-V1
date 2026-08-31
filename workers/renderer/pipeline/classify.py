@@ -2,9 +2,10 @@
 classify.py — Pipeline stage 1: turn a natural-language prompt into a
 `visualization_type` + extracted input parameters.
 
-Two paths, matching the user's decision for this MVP:
+Two paths:
   - LLM path: if an API key is available (per-request user key, or an
-    operator-configured ANTHROPIC_API_KEY env var), ask the model to
+    operator-configured provider env var — GROQ_API_KEY, GEMINI_API_KEY,
+    or ANTHROPIC_API_KEY depending on LLM_PROVIDER), ask the model to
     classify + extract in one structured-JSON call.
   - Manual fallback: if no key is available, raise `NeedsManualInput` so
     the caller (CLI or API layer) can prompt the user to directly supply

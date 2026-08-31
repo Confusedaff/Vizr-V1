@@ -83,8 +83,16 @@ export async function getCurrentUser(): Promise<User> {
 
 // -- Jobs -----------------------------------------------------------------
 
-export async function createJobFromPrompt(prompt: string, apiKey?: string): Promise<Job> {
-  const res = await client.post<Job>("/jobs", { prompt, api_key: apiKey || undefined });
+export async function createJobFromPrompt(
+  prompt: string,
+  provider?: string,
+  apiKey?: string
+): Promise<Job> {
+  const res = await client.post<Job>("/jobs", {
+    prompt,
+    provider: provider || undefined,
+    api_key: apiKey || undefined,
+  });
   return res.data;
 }
 
@@ -92,12 +100,14 @@ export async function createJobFromManual(
   visualizationType: string,
   input: Record<string, unknown>,
   title: string,
+  provider?: string,
   apiKey?: string
 ): Promise<Job> {
   const res = await client.post<Job>("/jobs/manual", {
     visualization_type: visualizationType,
     input,
     title,
+    provider: provider || undefined,
     api_key: apiKey || undefined,
   });
   return res.data;

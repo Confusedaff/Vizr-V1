@@ -51,7 +51,7 @@ async def create_job_from_prompt(
     await db.commit()
     await db.refresh(job)
 
-    render_from_prompt_task.delay(job.id, body.prompt, body.api_key)
+    render_from_prompt_task.delay(job.id, body.prompt, body.api_key, body.provider)
     return job
 
 
@@ -76,7 +76,7 @@ async def create_job_from_manual(
     await db.commit()
     await db.refresh(job)
 
-    render_from_manual_task.delay(job.id, body.visualization_type, body.input, body.title, body.api_key)
+    render_from_manual_task.delay(job.id, body.visualization_type, body.input, body.title, body.api_key, body.provider)
     return job
 
 

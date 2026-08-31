@@ -7,9 +7,10 @@ Usage:
   # Full pipeline from a manual scene JSON file (no LLM key needed):
   python debug_cli/run_pipeline.py from-scene --scene-file scene.json --job-id test1
 
-  # Full pipeline from a natural-language prompt (needs ANTHROPIC_API_KEY
-  # or --api-key):
+  # Full pipeline from a natural-language prompt (needs GROQ_API_KEY,
+  # GEMINI_API_KEY, or --api-key + --provider):
   python debug_cli/run_pipeline.py from-prompt --prompt "binary search for 9" --job-id test2
+  python debug_cli/run_pipeline.py from-prompt --prompt "binary search for 9" --provider gemini --api-key AIza... --job-id test2b
 
   # Full pipeline from manual classification (no LLM key needed, but still
   # exercises the real plan_scene LLM call unless --scene-file is also given):
@@ -95,7 +96,7 @@ def cmd_from_prompt(args: argparse.Namespace) -> int:
     from workers.renderer.pipeline.orchestrator import run_pipeline_from_prompt
 
     job_id = args.job_id or f"debug-{uuid.uuid4().hex[:8]}"
-    result = run_pipeline_from_prompt(job_id, args.prompt, api_key=args.api_key)
+    result = run_pipeline_from_prompt(job_id, args.prompt, api_key=args.api_key, provider=args.provider)
     print(result.manifest.print_summary())
     if result.needs_manual_input:
         print(f"\n>>> No LLM key available at stage '{result.needs_manual_input}'.")
@@ -109,7 +110,7 @@ def cmd_from_manual(args: argparse.Namespace) -> int:
     job_id = args.job_id or f"debug-{uuid.uuid4().hex[:8]}"
     input_params = json.loads(args.input) if args.input else {}
     result = run_pipeline_from_manual_classification(
-        job_id, args.type, input_params, args.title or args.type, api_key=args.api_key,
+        job_id, args.type, input_params, args.title or args.type, api_key=args.api_key, provider=args.provider,
     )
     print(result.manifest.print_summary())
     if result.needs_manual_input:
@@ -152,6 +153,7 @@ def main() -> int:
     p_prompt.add_argument("--prompt", required=True)
     p_prompt.add_argument("--job-id", default=None)
     p_prompt.add_argument("--api-key", default=None)
+    p_prompt.add_argument("--provider", default=None, choices=["groq", "gemini", "anthropic"])
     p_prompt.set_defaults(func=cmd_from_prompt)
 
     p_manual = sub.add_parser("from-manual")
@@ -160,6 +162,7 @@ def main() -> int:
     p_manual.add_argument("--title", default=None)
     p_manual.add_argument("--job-id", default=None)
     p_manual.add_argument("--api-key", default=None)
+    p_manual.add_argument("--provider", default=None, choices=["groq", "gemini", "anthropic"])
     p_manual.set_defaults(func=cmd_from_manual)
 
     p_inspect = sub.add_parser("inspect")

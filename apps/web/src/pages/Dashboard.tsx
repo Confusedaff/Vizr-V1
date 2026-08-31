@@ -29,10 +29,10 @@ export function Dashboard() {
     return () => clearInterval(interval);
   }, [refreshJobs]);
 
-  async function handlePromptSubmit(prompt: string, apiKey?: string) {
+  async function handlePromptSubmit(prompt: string, provider?: string, apiKey?: string) {
     setSubmitting(true);
     try {
-      const job = await api.createJobFromPrompt(prompt, apiKey);
+      const job = await api.createJobFromPrompt(prompt, provider, apiKey);
       await refreshJobs();
       navigate(`/jobs/${job.id}`);
     } finally {
@@ -44,11 +44,12 @@ export function Dashboard() {
     type: string,
     input: Record<string, unknown>,
     title: string,
+    provider?: string,
     apiKey?: string
   ) {
     setSubmitting(true);
     try {
-      const job = await api.createJobFromManual(type, input, title, apiKey);
+      const job = await api.createJobFromManual(type, input, title, provider, apiKey);
       await refreshJobs();
       navigate(`/jobs/${job.id}`);
     } finally {

@@ -59,12 +59,13 @@ def run_pipeline_from_prompt(
     prompt: str,
     *,
     api_key: str | None = None,
+    provider: str | None = None,
     debug_root: Path | None = None,
     resolution=None,
 ) -> PipelineResult:
     logger = StageLogger(job_id, root=debug_root)
     manifest = RenderManifest(job_id=job_id, prompt=prompt, renderer_version=RENDERER_VERSION)
-    client = LLMClient(api_key=api_key)
+    client = LLMClient(api_key=api_key, provider=provider)
 
     # -- Stage: classify --------------------------------------------------
     stage = logger.stage("classify")
@@ -109,6 +110,7 @@ def run_pipeline_from_manual_classification(
     title: str,
     *,
     api_key: str | None = None,
+    provider: str | None = None,
     debug_root: Path | None = None,
     resolution=None,
 ) -> PipelineResult:
@@ -117,7 +119,7 @@ def run_pipeline_from_manual_classification(
         job_id=job_id, visualization_type=visualization_type, renderer_version=RENDERER_VERSION
     )
     manifest.add_note("classification supplied manually (no LLM key)")
-    client = LLMClient(api_key=api_key)
+    client = LLMClient(api_key=api_key, provider=provider)
 
     classification = classify_from_manual_input(visualization_type, input_params, title)
     return _continue_from_classification(

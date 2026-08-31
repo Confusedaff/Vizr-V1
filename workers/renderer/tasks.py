@@ -132,7 +132,9 @@ async def _backfill_events_from_manifest(job_id: str, manifest_dict: dict) -> No
         await _record_event(job_id, stage["stage"], event_type, stage.get("error"))
 
 
-async def _run_and_persist(job_id: str, *, prompt: str | None, manual: dict | None, api_key: str | None) -> None:
+async def _run_and_persist(
+    job_id: str, *, prompt: str | None, manual: dict | None, api_key: str | None, provider: str | None
+) -> None:
     await _update_job_status(job_id, JobStatus.CLASSIFYING)
     await _record_event(job_id, "classify", "started", None)
 
@@ -142,12 +144,13 @@ async def _run_and_persist(job_id: str, *, prompt: str | None, manual: dict | No
         result = await loop.run_in_executor(
             None,
             lambda: run_pipeline_from_manual_classification(
-                job_id, manual["visualization_type"], manual["input"], manual["title"], api_key=api_key,
+                job_id, manual["visualization_type"], manual["input"], manual["title"],
+                api_key=api_key, provider=provider,
             ),
         )
     else:
         result = await loop.run_in_executor(
-            None, lambda: run_pipeline_from_prompt(job_id, prompt, api_key=api_key)
+            None, lambda: run_pipeline_from_prompt(job_id, prompt, api_key=api_key, provider=provider)
         )
 
     manifest_dict = result.manifest.to_dict()
@@ -188,9 +191,9 @@ async def _run_and_persist(job_id: str, *, prompt: str | None, manual: dict | No
 
 
 @shared_task(bind=True, name="workers.renderer.tasks.render_from_prompt", max_retries=2)
-def render_from_prompt_task(self, job_id: str, prompt: str, api_key: str | None = None):
+def render_from_prompt_task(self, job_id: str, prompt: str, api_key: str | None = None, provider: str | None = None):
     try:
-        asyncio.run(_run_and_persist(job_id, prompt=prompt, manual=None, api_key=api_key))
+        asyncio.run(_run_and_persist(job_id, prompt=prompt, manual=None, api_key=api_key, provider=provider))
     except Exception as exc:
         logger.exception("Infra-level failure for job %s, retrying", job_id)
         raise self.retry(exc=exc, countdown=10)
@@ -198,14 +201,15 @@ def render_from_prompt_task(self, job_id: str, prompt: str, api_key: str | None 
 
 @shared_task(bind=True, name="workers.renderer.tasks.render_from_manual", max_retries=2)
 def render_from_manual_task(
-    self, job_id: str, visualization_type: str, input_params: dict, title: str, api_key: str | None = None
+    self, job_id: str, visualization_type: str, input_params: dict, title: str,
+    api_key: str | None = None, provider: str | None = None,
 ):
     try:
         asyncio.run(
             _run_and_persist(
                 job_id, prompt=None,
                 manual={"visualization_type": visualization_type, "input": input_params, "title": title},
-                api_key=api_key,
+                api_key=api_key, provider=provider,
             )
         )
     except Exception as exc:

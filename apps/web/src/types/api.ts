@@ -37,6 +37,34 @@ export const VISUALIZATION_TYPES = [
 
 export type VisualizationType = (typeof VISUALIZATION_TYPES)[number];
 
+export interface LLMProviderOption {
+  id: "groq" | "gemini" | "anthropic";
+  label: string;
+  signupUrl: string;
+  keyPlaceholder: string;
+}
+
+export const LLM_PROVIDERS: LLMProviderOption[] = [
+  {
+    id: "groq",
+    label: "Groq (free, fastest to set up)",
+    signupUrl: "https://console.groq.com/keys",
+    keyPlaceholder: "gsk_…",
+  },
+  {
+    id: "gemini",
+    label: "Gemini (free tier)",
+    signupUrl: "https://aistudio.google.com/apikey",
+    keyPlaceholder: "AIza…",
+  },
+  {
+    id: "anthropic",
+    label: "Anthropic (Claude)",
+    signupUrl: "https://console.anthropic.com/settings/keys",
+    keyPlaceholder: "sk-ant-…",
+  },
+];
+
 export interface Job {
   id: string;
   status: JobStatus;
