@@ -17,8 +17,8 @@ interface Props {
   initialPrompt?: string;
 }
 
-const PROVIDER_STORAGE_KEY = "aiviz_llm_provider";
-const KEY_STORAGE_PREFIX = "aiviz_llm_key_";
+const PROVIDER_STORAGE_KEY = "vizr_llm_provider";
+const KEY_STORAGE_PREFIX = "vizr_llm_key_";
 
 export function JobCreateForm({ onSubmitPrompt, onSubmitManual, submitting, initialPrompt }: Props) {
   const [mode, setMode] = useState<"prompt" | "manual">("prompt");
@@ -156,7 +156,7 @@ export function JobCreateForm({ onSubmitPrompt, onSubmitManual, submitting, init
 }
 
 /** Keeps the chosen provider + that provider's key in localStorage, keyed
- * per-provider (aiviz_llm_key_groq, aiviz_llm_key_gemini, ...) so switching
+ * per-provider (vizr_llm_key_groq, vizr_llm_key_gemini, ...) so switching
  * providers doesn't clobber a key you already typed in for another one —
  * genuinely useful when trying more than one free-tier provider locally. */
 function useProviderKey() {

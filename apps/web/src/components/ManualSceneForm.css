@@ -36,8 +36,18 @@
   border-radius: var(--radius-sm);
   padding: 10px;
   color: var(--text-primary);
-  font-size: 12px;
+  font-size: 16px;
   resize: vertical;
+  width: 100%;
+}
+
+@media (max-width: 480px) {
+  .manual-scene {
+    padding: 16px;
+  }
+  .manual-scene__submit {
+    align-self: stretch;
+  }
 }
 
 .manual-scene__error {

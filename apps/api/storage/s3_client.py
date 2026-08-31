@@ -24,9 +24,9 @@ from botocore.client import Config as BotoConfig
 from botocore.exceptions import BotoCoreError, ClientError
 
 S3_ENDPOINT_URL = os.environ.get("S3_ENDPOINT_URL") or None
-S3_ACCESS_KEY = os.environ.get("S3_ACCESS_KEY", "aiviz_minio_admin")
-S3_SECRET_KEY = os.environ.get("S3_SECRET_KEY", "aiviz_minio_secret")
-S3_BUCKET = os.environ.get("S3_BUCKET", "aiviz-videos")
+S3_ACCESS_KEY = os.environ.get("S3_ACCESS_KEY", "vizr_minio_admin")
+S3_SECRET_KEY = os.environ.get("S3_SECRET_KEY", "vizr_minio_secret")
+S3_BUCKET = os.environ.get("S3_BUCKET", "vizr-videos")
 S3_REGION = os.environ.get("S3_REGION", "us-east-1")
 # How long a presigned GET URL remains valid. Videos aren't re-signed on
 # every request (see video_url caching in tasks.py) — this only bounds

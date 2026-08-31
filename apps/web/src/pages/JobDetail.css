@@ -21,6 +21,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+  min-width: 0;
 }
 
 .job-detail__title {
@@ -29,12 +30,24 @@
   font-weight: 600;
   margin: 0 0 8px;
   line-height: 1.35;
+  overflow-wrap: break-word;
 }
 
 .job-detail__meta {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
+  row-gap: 6px;
+}
+
+@media (max-width: 480px) {
+  .job-detail {
+    gap: 16px;
+  }
+  .job-detail__title {
+    font-size: 18px;
+  }
 }
 
 .job-detail__type {

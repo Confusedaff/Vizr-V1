@@ -56,3 +56,15 @@
   line-height: 1.6;
   margin: 0;
 }
+
+@media (max-width: 640px) {
+  .features {
+    padding: 44px 20px;
+  }
+  .features__title {
+    margin-bottom: 32px;
+  }
+  .features__grid {
+    grid-template-columns: 1fr;
+  }
+}

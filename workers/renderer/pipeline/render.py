@@ -6,7 +6,7 @@ selected by the SANDBOX_MODE environment variable:
   - "subprocess" (default): run in a plain Python subprocess on the same
     host. A Manim crash/hang can't take down the worker process itself,
     but the render shares the host's filesystem/network/user.
-  - "docker": run inside the isolated `aiviz-sandbox` container (see
+  - "docker": run inside the isolated `vizr-sandbox` container (see
     manim_engine/renderer/sandbox.py and
     infrastructure/docker/Dockerfile.sandbox) — no network, read-only
     root, non-root user, capped CPU/memory/pids. This is the harder

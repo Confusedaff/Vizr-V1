@@ -40,7 +40,7 @@ export function AuthPage() {
       <div className="auth-page__card">
         <div className="auth-page__mark">
           <span className="auth-page__mark-glyph">▸</span>
-          <span className="auth-page__mark-text">aiviz</span>
+          <span className="auth-page__mark-text">vizr</span>
         </div>
         <p className="auth-page__tagline">Turn an algorithm into a video you can trust.</p>
 

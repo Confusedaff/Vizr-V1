@@ -1,6 +1,6 @@
 """
 sandbox.py — host-side runner that executes a render inside the
-`aiviz-sandbox` Docker image (infrastructure/docker/Dockerfile.sandbox)
+`vizr-sandbox` Docker image (infrastructure/docker/Dockerfile.sandbox)
 via `docker run`, with the isolation flags spelled out explicitly below.
 
 This is the "harder" isolation option compared to
@@ -18,7 +18,7 @@ exercised against a live render in this development environment, which
 has no Docker daemon available. Before relying on this in production,
 run it against a real render at least once and confirm:
   1. `docker build -f infrastructure/docker/Dockerfile.sandbox -t
-     aiviz-sandbox .` succeeds
+     vizr-sandbox .` succeeds
   2. A real Scene renders successfully through `render_scene_sandboxed()`
   3. The quality-gate/validation results match what the non-sandboxed
      path produces for the same Scene (they should be bit-for-bit
@@ -37,7 +37,7 @@ import uuid
 from dataclasses import dataclass
 from pathlib import Path
 
-SANDBOX_IMAGE = "aiviz-sandbox:latest"
+SANDBOX_IMAGE = "vizr-sandbox:latest"
 RESULT_MARKER = "__SANDBOX_RESULT_JSON__"
 
 # Resource limits — deliberately conservative. A render that needs more
@@ -126,11 +126,11 @@ def render_scene_sandboxed(
         raise SandboxUnavailableError(
             f"Docker sandbox image {SANDBOX_IMAGE!r} is not available. "
             "Build it with: docker build -f infrastructure/docker/Dockerfile.sandbox "
-            "-t aiviz-sandbox . — or set SANDBOX_MODE=subprocess to use the "
+            "-t vizr-sandbox . — or set SANDBOX_MODE=subprocess to use the "
             "non-sandboxed render path instead."
         )
 
-    input_dir = Path(tempfile.mkdtemp(prefix="aiviz-sandbox-input-"))
+    input_dir = Path(tempfile.mkdtemp(prefix="vizr-sandbox-input-"))
     scene_with_render_opts = {
         **scene_dict,
         "__render_width": resolution[0],
@@ -139,7 +139,7 @@ def render_scene_sandboxed(
     }
     (input_dir / "scene.json").write_text(json.dumps(scene_with_render_opts))
 
-    container_name = f"aiviz-render-{uuid.uuid4().hex[:12]}"
+    container_name = f"vizr-render-{uuid.uuid4().hex[:12]}"
     args = build_docker_run_args(input_dir=input_dir, output_dir=output_dir, container_name=container_name)
 
     started = time.time()

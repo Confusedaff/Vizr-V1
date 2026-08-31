@@ -116,7 +116,7 @@ class StageLogger:
         self.root.mkdir(parents=True, exist_ok=True)
         self.echo_to_console = echo_to_console
 
-        self._logger = logging.getLogger(f"aiviz.job.{job_id}")
+        self._logger = logging.getLogger(f"vizr.job.{job_id}")
         self._logger.setLevel(logging.DEBUG)
         self._logger.handlers.clear()
 

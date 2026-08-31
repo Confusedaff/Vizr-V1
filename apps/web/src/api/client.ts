@@ -8,7 +8,7 @@ import type {
 } from "../types/api";
 
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
-const TOKEN_STORAGE_KEY = "aiviz_access_token";
+const TOKEN_STORAGE_KEY = "vizr_access_token";
 
 export function getToken(): string | null {
   return localStorage.getItem(TOKEN_STORAGE_KEY);

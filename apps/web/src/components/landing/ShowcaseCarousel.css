@@ -150,11 +150,44 @@
   .showcase__panel {
     grid-template-columns: 1fr;
     gap: 32px;
+    min-height: 0;
   }
   .showcase__title {
     font-size: 32px;
   }
   .showcase {
     padding: 40px 20px 60px;
+  }
+  .showcase__stage {
+    min-height: 320px;
+    padding: 28px;
+  }
+}
+
+@media (max-width: 520px) {
+  .showcase {
+    padding: 32px 16px 48px;
+  }
+  .showcase__title {
+    font-size: 26px;
+  }
+  .showcase__description {
+    font-size: 15px;
+    max-width: 100%;
+  }
+  .showcase__stage {
+    min-height: 240px;
+    padding: 20px;
+    border-radius: var(--radius-lg);
+  }
+  .showcase__stage-badge {
+    top: 16px;
+    left: 16px;
+    padding: 6px 14px;
+    font-size: 13px;
+  }
+  .showcase__pagination {
+    margin-top: 28px;
+    flex-wrap: wrap;
   }
 }

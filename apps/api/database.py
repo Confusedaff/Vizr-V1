@@ -9,7 +9,7 @@ from collections.abc import AsyncGenerator
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 DATABASE_URL = os.environ.get(
-    "DATABASE_URL", "postgresql+asyncpg://aiviz:aiviz@localhost:5432/aiviz"
+    "DATABASE_URL", "postgresql+asyncpg://vizr:vizr@localhost:5432/vizr"
 )
 
 engine = create_async_engine(DATABASE_URL, echo=False, pool_pre_ping=True)

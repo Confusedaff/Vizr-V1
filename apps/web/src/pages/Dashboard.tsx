@@ -64,9 +64,11 @@ export function Dashboard() {
       <aside className="dashboard__sidebar">
         <div className="dashboard__brand">
           <span className="dashboard__brand-glyph">▸</span>
-          <span>aiviz</span>
+          <span>vizr</span>
         </div>
-        <JobList jobs={jobs} />
+        <div className="dashboard__sidebar-scroll">
+          <JobList jobs={jobs} />
+        </div>
         <div className="dashboard__account">
           <span className="dashboard__email">{user?.email}</span>
           <button className="dashboard__logout" onClick={logout}>

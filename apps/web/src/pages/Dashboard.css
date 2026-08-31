@@ -2,6 +2,7 @@
   display: grid;
   grid-template-columns: 260px 1fr;
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .dashboard__sidebar {
@@ -14,6 +15,14 @@
   position: sticky;
   top: 0;
   height: 100vh;
+  height: 100dvh;
+  overflow-y: auto;
+  min-width: 0;
+}
+
+.dashboard__sidebar-scroll {
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
 }
 
@@ -70,14 +79,32 @@
   flex-direction: column;
   gap: 28px;
   max-width: 900px;
+  min-width: 0;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .dashboard__content {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  min-width: 0;
 }
 
+/* Tablet: keep the two-column shell but narrow the sidebar so the main
+   column still has comfortable room. */
+@media (max-width: 1100px) {
+  .dashboard {
+    grid-template-columns: 220px 1fr;
+  }
+  .dashboard__main {
+    padding: 28px 28px 48px;
+  }
+}
+
+/* Below this width the sidebar stops being usable as a fixed column —
+   stack it above the content instead and cap its own job-history list
+   so a long history can't push the create-form far down the page. */
 @media (max-width: 860px) {
   .dashboard {
     grid-template-columns: 1fr;
@@ -87,8 +114,21 @@
     height: auto;
     border-right: none;
     border-bottom: 1px solid var(--border-subtle);
+    max-height: 60vh;
+    max-height: 60dvh;
+  }
+  .dashboard__sidebar-scroll {
+    max-height: 34vh;
+    max-height: 34dvh;
   }
   .dashboard__main {
     padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard__main {
+    padding: 16px;
+    gap: 20px;
   }
 }

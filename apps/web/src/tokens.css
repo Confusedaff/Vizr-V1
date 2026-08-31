@@ -63,10 +63,26 @@ body {
   font-size: 14px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  /* Prevent iOS Safari from horizontally rubber-banding when a nested
+     element briefly overflows during a layout transition. */
+  overflow-x: hidden;
 }
 
 #root {
   height: 100%;
+}
+
+/* Any element opting into this utility gets a horizontally-scrollable
+   region with its own touch scrolling, so wide content (tables, code)
+   never forces the whole page to overflow on small screens. */
+.scroll-x {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+img, svg, video {
+  max-width: 100%;
+  height: auto;
 }
 
 a {

@@ -39,7 +39,7 @@ export function LandingHero() {
         Need to <span className="hero__title-muted">Visualize?</span>
       </h1>
       <p className="hero__subtitle">
-        Turn any algorithm into a narrated video. Just describe it, aiviz animates it.
+        Turn any algorithm into a narrated video. Just describe it, vizr animates it.
       </p>
 
       <button type="button" className="hero__cta" onClick={() => goCreate(prompt)}>

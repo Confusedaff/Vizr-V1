@@ -20,7 +20,7 @@ from manim_engine.renderer.validate_render import validate_render
 from workers.renderer.pipeline.render import render_scene
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-TMP_OUTPUT = Path("/tmp/aiviz_integration_test_output")
+TMP_OUTPUT = Path("/tmp/vizr_integration_test_output")
 
 SCENES: dict[str, dict] = {
     "array_traversal": dict(

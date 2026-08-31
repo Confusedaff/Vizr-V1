@@ -35,3 +35,9 @@
 .landing-footer__cta:hover {
   text-decoration: underline;
 }
+
+@media (max-width: 480px) {
+  .landing-footer {
+    padding: 36px 20px;
+  }
+}

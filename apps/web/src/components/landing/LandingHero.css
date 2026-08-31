@@ -30,11 +30,12 @@
   position: relative;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: clamp(48px, 7vw, 92px);
+  font-size: clamp(38px, 10vw, 92px);
   line-height: 1.05;
   margin: 0;
   color: var(--text-primary);
   letter-spacing: -0.02em;
+  overflow-wrap: break-word;
 }
 
 .hero__title-muted {
@@ -144,12 +145,40 @@
 
 @media (max-width: 640px) {
   .hero {
-    padding: 60px 20px 60px;
+    padding: 56px 20px 48px;
+  }
+  .hero__subtitle {
+    font-size: 16px;
+    margin: 18px 0 32px;
+  }
+  .hero__cta {
+    width: 100%;
+    justify-content: center;
+    padding: 15px 24px;
+    margin-bottom: 32px;
   }
   .hero__promptbar {
     padding: 14px 16px;
   }
   .hero__promptbar input {
-    font-size: 15px;
+    font-size: 16px;
+    min-width: 0;
+  }
+  .hero__chips {
+    gap: 8px;
+  }
+  .hero__chip {
+    font-size: 13px;
+    padding: 7px 14px;
+  }
+}
+
+@media (max-width: 380px) {
+  .hero {
+    padding: 44px 16px 40px;
+  }
+  .hero__promptbar {
+    padding: 12px 14px;
+    gap: 8px;
   }
 }

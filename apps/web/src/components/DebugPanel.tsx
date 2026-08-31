@@ -42,28 +42,30 @@ export function DebugPanel({ jobId }: { jobId: string }) {
           {manifest && (
             <section className="debug-panel__section">
               <h4>Stage timings</h4>
-              <table className="debug-panel__table">
-                <thead>
-                  <tr>
-                    <th>stage</th>
-                    <th>attempt</th>
-                    <th>duration</th>
-                    <th>result</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {manifest.stages.map((s, i) => (
-                    <tr key={`${s.stage}-${i}`}>
-                      <td>{s.stage}</td>
-                      <td>{s.attempt}</td>
-                      <td>{s.duration_seconds != null ? `${s.duration_seconds.toFixed(2)}s` : "—"}</td>
-                      <td className={s.success ? "debug-panel__ok" : s.success === false ? "debug-panel__fail" : ""}>
-                        {s.success === true ? "ok" : s.success === false ? "failed" : "…"}
-                      </td>
+              <div className="debug-panel__table-scroll scroll-x">
+                <table className="debug-panel__table">
+                  <thead>
+                    <tr>
+                      <th>stage</th>
+                      <th>attempt</th>
+                      <th>duration</th>
+                      <th>result</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {manifest.stages.map((s, i) => (
+                      <tr key={`${s.stage}-${i}`}>
+                        <td>{s.stage}</td>
+                        <td>{s.attempt}</td>
+                        <td>{s.duration_seconds != null ? `${s.duration_seconds.toFixed(2)}s` : "—"}</td>
+                        <td className={s.success ? "debug-panel__ok" : s.success === false ? "debug-panel__fail" : ""}>
+                          {s.success === true ? "ok" : s.success === false ? "failed" : "…"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
               {manifest.notes.length > 0 && (
                 <ul className="debug-panel__notes">
                   {manifest.notes.map((n, i) => (

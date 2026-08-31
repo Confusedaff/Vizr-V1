@@ -95,7 +95,8 @@
   border-radius: var(--radius-sm);
   padding: 10px 12px;
   color: var(--text-primary);
-  font-size: 14px;
+  font-size: 16px;
+  width: 100%;
 }
 
 .auth-page__field input:focus {
@@ -127,4 +128,13 @@
 .auth-page__submit:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+@media (max-width: 420px) {
+  .auth-page {
+    padding: 16px;
+  }
+  .auth-page__card {
+    padding: 28px 20px;
+  }
 }

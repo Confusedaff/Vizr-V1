@@ -17,6 +17,8 @@
   padding: 6px 14px;
   color: var(--text-faint);
   transition: color 0.2s ease;
+  flex-wrap: wrap;
+  row-gap: 4px;
 }
 
 .pipeline-trace__icon {
@@ -61,6 +63,15 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+@media (max-width: 520px) {
+  .pipeline-trace__message {
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: break-word;
+    flex-basis: 100%;
+  }
 }
 
 .pipeline-trace__spinner {

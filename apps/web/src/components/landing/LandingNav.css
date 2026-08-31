@@ -66,11 +66,119 @@
   transform: translateY(-1px);
 }
 
+/* Hamburger toggle — hidden by default, only shown below the breakpoint. */
+.landing-nav__menu-btn {
+  display: none;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.landing-nav__burger,
+.landing-nav__burger::before,
+.landing-nav__burger::after {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--text-primary);
+  border-radius: 2px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.landing-nav__burger {
+  position: relative;
+}
+
+.landing-nav__burger::before,
+.landing-nav__burger::after {
+  content: "";
+  position: absolute;
+  left: 0;
+}
+
+.landing-nav__burger::before {
+  top: -6px;
+}
+
+.landing-nav__burger::after {
+  top: 6px;
+}
+
+.landing-nav__burger--open {
+  background: transparent;
+}
+
+.landing-nav__burger--open::before {
+  top: 0;
+  transform: rotate(45deg);
+}
+
+.landing-nav__burger--open::after {
+  top: 0;
+  transform: rotate(-45deg);
+}
+
+/* Full-width dropdown panel, collapsed by default via max-height so it
+   animates open/closed instead of just appearing/disappearing. */
+.landing-nav__mobile {
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 0;
+  overflow: hidden;
+  padding: 0 20px;
+  background: var(--bg-raised);
+  border-bottom: 1px solid var(--border-subtle);
+  transition: max-height 0.25s ease, padding 0.25s ease;
+}
+
+.landing-nav__mobile a {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 16px;
+  padding: 14px 4px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.landing-nav__mobile a:last-of-type {
+  border-bottom: none;
+}
+
+.landing-nav__mobile-cta {
+  margin: 14px 0 18px;
+  text-align: center;
+  background: linear-gradient(120deg, rgba(236, 72, 153, 0.25), rgba(76, 154, 255, 0.25));
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: var(--text-primary) !important;
+  padding: 12px 22px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
 @media (max-width: 860px) {
-  .landing-nav__links {
+  .landing-nav__links,
+  .landing-nav__cta {
     display: none;
   }
   .landing-nav__inner {
-    padding: 16px 20px;
+    padding: 14px 20px;
+  }
+  .landing-nav__menu-btn {
+    display: flex;
+  }
+  .landing-nav__mobile {
+    display: flex;
+  }
+  .landing-nav__mobile--open {
+    max-height: 400px;
+    padding: 4px 20px 0;
   }
 }
