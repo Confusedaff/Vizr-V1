@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { ApiError } from "../api/client";
 import "./AuthPage.css";
@@ -13,6 +13,8 @@ export function AuthPage() {
   const [submitting, setSubmitting] = useState(false);
   const { login, signup } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const prefillPrompt = (location.state as { prefillPrompt?: string } | null)?.prefillPrompt;
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -24,7 +26,7 @@ export function AuthPage() {
       } else {
         await signup(email, password);
       }
-      navigate("/");
+      navigate("/app", { state: prefillPrompt ? { prefillPrompt } : undefined });
     } catch (err) {
       const message = err instanceof ApiError ? err.detail : "Something went wrong. Try again.";
       setError(message);
@@ -41,6 +43,12 @@ export function AuthPage() {
           <span className="auth-page__mark-text">aiviz</span>
         </div>
         <p className="auth-page__tagline">Turn an algorithm into a video you can trust.</p>
+
+        {prefillPrompt && (
+          <p className="auth-page__prefill-note">
+            Sign in to generate: <span className="mono">&ldquo;{prefillPrompt}&rdquo;</span>
+          </p>
+        )}
 
         <div className="auth-page__tabs">
           <button

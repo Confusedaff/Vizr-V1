@@ -104,8 +104,12 @@ apps/api/
                                  over the query string, ownership-checked before
                                  the socket is accepted.
 
-apps/web/                       React + TypeScript + Vite frontend. Auth pages,
-                                 job creation (prompt or manual), a live
+apps/web/                       React + TypeScript + Vite frontend. A public
+                                 landing page (/) with a stylized hero, prompt
+                                 bar, and a static per-category showcase
+                                 carousel, all routing "Get Started" into
+                                 auth. Once signed in (/app), the same prompt
+                                 or manual-input job creation, live
                                  pipeline-trace view, video playback with
                                  presigned-URL refresh, and a debug panel
                                  exposing the manifest/quality-report data.

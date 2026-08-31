@@ -1,0 +1,155 @@
+.hero {
+  position: relative;
+  padding: 100px 40px 80px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+}
+
+.hero__glow {
+  position: absolute;
+  inset: -200px 0 auto 0;
+  height: 700px;
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 20%, rgba(34, 211, 238, 0.18), transparent 60%),
+    radial-gradient(ellipse 40% 40% at 30% 10%, rgba(76, 154, 255, 0.14), transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero__eyebrow {
+  position: relative;
+  color: var(--text-faint);
+  font-size: 13px;
+  margin: 0 0 8px;
+}
+
+.hero__title {
+  position: relative;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(48px, 7vw, 92px);
+  line-height: 1.05;
+  margin: 0;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.hero__title-muted {
+  color: var(--text-faint);
+}
+
+.hero__subtitle {
+  position: relative;
+  max-width: 640px;
+  margin: 24px 0 40px;
+  color: var(--text-muted);
+  font-size: 19px;
+  line-height: 1.5;
+}
+
+.hero__cta {
+  position: relative;
+  background: #0a0d11;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: var(--text-primary);
+  padding: 16px 32px;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transition: transform 0.15s ease, background 0.15s ease;
+  margin-bottom: 48px;
+}
+
+.hero__cta:hover {
+  background: #14181f;
+  transform: translateY(-2px);
+}
+
+.hero__promptbar {
+  position: relative;
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 22px 24px;
+}
+
+.hero__promptbar input {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: 18px;
+}
+
+.hero__promptbar input::placeholder {
+  color: var(--text-faint);
+}
+
+.hero__promptbar button {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  border-radius: 50%;
+  background: var(--text-primary);
+  color: var(--bg);
+  border: none;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease;
+}
+
+.hero__promptbar button:hover {
+  transform: scale(1.06);
+}
+
+.hero__chips {
+  position: relative;
+  margin-top: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.hero__chip {
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.hero__chip:hover {
+  border-color: var(--cell-stroke);
+  color: var(--text-primary);
+}
+
+@media (max-width: 640px) {
+  .hero {
+    padding: 60px 20px 60px;
+  }
+  .hero__promptbar {
+    padding: 14px 16px;
+  }
+  .hero__promptbar input {
+    font-size: 15px;
+  }
+}

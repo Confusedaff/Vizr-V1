@@ -5,15 +5,17 @@ import { AuthPage } from "./pages/AuthPage";
 import { Dashboard } from "./pages/Dashboard";
 import { EmptyState } from "./pages/EmptyState";
 import { JobDetail } from "./pages/JobDetail";
+import { LandingPage } from "./pages/LandingPage";
 
 export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<AuthPage />} />
           <Route
-            path="/"
+            path="/app"
             element={
               <RequireAuth>
                 <Dashboard />

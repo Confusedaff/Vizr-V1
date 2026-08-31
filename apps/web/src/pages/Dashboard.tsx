@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import * as api from "../api/client";
 import { JobCreateForm } from "../components/JobCreateForm";
 import { JobList } from "../components/JobList";
@@ -12,6 +12,8 @@ export function Dashboard() {
   const [submitting, setSubmitting] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const prefillPrompt = (location.state as { prefillPrompt?: string } | null)?.prefillPrompt;
 
   const refreshJobs = useCallback(async () => {
     try {
@@ -34,7 +36,7 @@ export function Dashboard() {
     try {
       const job = await api.createJobFromPrompt(prompt, provider, apiKey);
       await refreshJobs();
-      navigate(`/jobs/${job.id}`);
+      navigate(`/app/jobs/${job.id}`);
     } finally {
       setSubmitting(false);
     }
@@ -51,7 +53,7 @@ export function Dashboard() {
     try {
       const job = await api.createJobFromManual(type, input, title, provider, apiKey);
       await refreshJobs();
-      navigate(`/jobs/${job.id}`);
+      navigate(`/app/jobs/${job.id}`);
     } finally {
       setSubmitting(false);
     }
@@ -78,6 +80,7 @@ export function Dashboard() {
           onSubmitPrompt={handlePromptSubmit}
           onSubmitManual={handleManualSubmit}
           submitting={submitting}
+          initialPrompt={prefillPrompt}
         />
         <div className="dashboard__content">
           <Outlet />

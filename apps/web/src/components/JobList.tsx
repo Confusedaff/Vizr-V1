@@ -15,7 +15,7 @@ export function JobList({ jobs }: { jobs: Job[] }) {
       {jobs.map((job) => (
         <Link
           key={job.id}
-          to={`/jobs/${job.id}`}
+          to={`/app/jobs/${job.id}`}
           className={`job-list__item ${job.id === activeId ? "job-list__item--active" : ""}`}
         >
           <div className="job-list__item-top">

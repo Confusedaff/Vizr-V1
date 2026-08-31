@@ -14,14 +14,15 @@ interface Props {
     apiKey?: string
   ) => Promise<void>;
   submitting: boolean;
+  initialPrompt?: string;
 }
 
 const PROVIDER_STORAGE_KEY = "aiviz_llm_provider";
 const KEY_STORAGE_PREFIX = "aiviz_llm_key_";
 
-export function JobCreateForm({ onSubmitPrompt, onSubmitManual, submitting }: Props) {
+export function JobCreateForm({ onSubmitPrompt, onSubmitManual, submitting, initialPrompt }: Props) {
   const [mode, setMode] = useState<"prompt" | "manual">("prompt");
-  const [prompt, setPrompt] = useState("");
+  const [prompt, setPrompt] = useState(initialPrompt ?? "");
 
   const [manualType, setManualType] = useState<string>(VISUALIZATION_TYPES[0]);
   const [manualTitle, setManualTitle] = useState("");
@@ -30,6 +31,10 @@ export function JobCreateForm({ onSubmitPrompt, onSubmitManual, submitting }: Pr
   const [error, setError] = useState<string | null>(null);
 
   const providerState = useProviderKey();
+
+  useEffect(() => {
+    if (initialPrompt) setPrompt(initialPrompt);
+  }, [initialPrompt]);
 
   async function handlePromptSubmit(e: FormEvent) {
     e.preventDefault();

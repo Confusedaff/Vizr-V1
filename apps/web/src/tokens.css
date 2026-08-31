@@ -30,6 +30,18 @@
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
+  --radius-xl: 20px;
+
+  /* Landing-page accent palette — one hue per showcase category, matching
+     the reference's per-slide color coding (math=violet, physics=orange,
+     chemistry=cyan, AI/ML=pink, astronomy=indigo, CS=emerald, strategy=amber). */
+  --accent-math: #8b7cf6;
+  --accent-physics: #f2994a;
+  --accent-chemistry: #22d3ee;
+  --accent-ai: #ec4899;
+  --accent-astro: #6366f1;
+  --accent-cs: #34d399;
+  --accent-strategy: #eab308;
 
   color-scheme: dark;
 }
