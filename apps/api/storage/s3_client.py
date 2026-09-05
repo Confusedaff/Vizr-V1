@@ -16,6 +16,8 @@ JobStatus.RENDERING).
 from __future__ import annotations
 
 import os
+import subprocess
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -76,10 +78,54 @@ def ensure_bucket_exists(bucket: str = S3_BUCKET) -> None:
         raise StorageError(f"Could not reach object storage to check bucket {bucket!r}: {e}") from e
 
 
+def _remux_for_web_playback(local_path: Path) -> Path:
+    """Manim's file writer (via PyAV) concatenates partial movie files by
+    remuxing packets with no `movflags=+faststart`, so the mp4's `moov`
+    atom (the index) lands at the *end* of the file. Players that read
+    the whole file from local disk (VLC, ffprobe) don't care, but a
+    browser <video> element streaming from a presigned S3/MinIO URL
+    generally needs the moov atom up front to start decoding at all —
+    without it you get "No video with supported format and MIME type
+    found" even though the codec (libx264/yuv420p) is perfectly valid.
+    This does a fast, lossless remux (-c copy, no re-encode) to move the
+    moov atom to the front before upload. Returns the original path
+    unchanged if ffmpeg isn't available or the remux fails, so a missing
+    ffmpeg binary degrades to the old (sometimes-unplayable) behavior
+    instead of failing the whole upload.
+    """
+    fixed_fd, fixed_name = tempfile.mkstemp(suffix=".mp4", dir=str(local_path.parent))
+    os.close(fixed_fd)
+    fixed_path = Path(fixed_name)
+
+    try:
+        result = subprocess.run(
+            [
+                "ffmpeg", "-y", "-v", "error",
+                "-i", str(local_path),
+                "-c", "copy",
+                "-movflags", "+faststart",
+                str(fixed_path),
+            ],
+            capture_output=True, text=True, timeout=60,
+        )
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        fixed_path.unlink(missing_ok=True)
+        return local_path
+
+    if result.returncode != 0 or not fixed_path.exists() or fixed_path.stat().st_size == 0:
+        fixed_path.unlink(missing_ok=True)
+        return local_path
+
+    fixed_path.replace(local_path)
+    return local_path
+
+
 def upload_video(local_path: str | Path, *, job_id: str, bucket: str = S3_BUCKET) -> UploadResult:
     local_path = Path(local_path)
     if not local_path.exists():
         raise StorageError(f"Local video file does not exist: {local_path}")
+
+    local_path = _remux_for_web_playback(local_path)
 
     object_key = f"renders/{job_id}/{local_path.name}"
     client = _get_client()
@@ -100,7 +146,26 @@ def upload_video(local_path: str | Path, *, job_id: str, bucket: str = S3_BUCKET
 def get_presigned_url(
     object_key: str, *, bucket: str = S3_BUCKET, expires_in: int = PRESIGNED_URL_EXPIRY_SECONDS
 ) -> str:
-    client = _get_client()
+    # Presigned URLs are consumed by the *browser*, not by this container,
+    # so they must be signed against a host the browser can resolve.
+    # S3_ENDPOINT_URL (e.g. http://minio:9000) is the Docker-internal
+    # hostname used for server-to-server calls (upload_file, head_bucket,
+    # etc.) and is never reachable from outside the compose network.
+    # S3_PUBLIC_ENDPOINT_URL overrides just the host used for signing,
+    # defaulting to localhost:9000 (MinIO's published port) for local dev.
+    # Only set explicitly when S3_ENDPOINT_URL itself is configured (i.e.
+    # we're actually pointed at MinIO, not plain AWS/moto) — this mirrors
+    # _get_client's endpoint handling so tests using moto's default AWS
+    # endpoint resolution are unaffected.
+    kwargs = dict(
+        aws_access_key_id=os.environ.get("S3_ACCESS_KEY", S3_ACCESS_KEY),
+        aws_secret_access_key=os.environ.get("S3_SECRET_KEY", S3_SECRET_KEY),
+        region_name=os.environ.get("S3_REGION", S3_REGION),
+        config=BotoConfig(signature_version="s3v4"),
+    )
+    if os.environ.get("S3_ENDPOINT_URL"):
+        kwargs["endpoint_url"] = os.environ.get("S3_PUBLIC_ENDPOINT_URL") or "http://localhost:9000"
+    client = boto3.client("s3", **kwargs)
     try:
         return client.generate_presigned_url(
             "get_object",

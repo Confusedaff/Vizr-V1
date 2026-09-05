@@ -85,8 +85,8 @@ def test_default_model_used_when_not_specified(monkeypatch):
 
 
 def test_explicit_model_overrides_default():
-    client = LLMClient(api_key="fake", provider="groq", model="llama-3.1-8b-instant")
-    assert client.model == "llama-3.1-8b-instant"
+    client = LLMClient(api_key="fake", provider="groq", model="openai/gpt-oss-20b")
+    assert client.model == "openai/gpt-oss-20b"
 
 
 def test_groq_complete_json_dispatches_correctly():

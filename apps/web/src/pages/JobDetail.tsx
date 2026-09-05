@@ -83,7 +83,7 @@ export function JobDetail() {
       )}
 
       {job.video_url && job.status === "completed" ? (
-        <VideoPlayer jobId={job.id} videoUrl={job.video_url} />
+        <VideoPlayer key={job.id} jobId={job.id} videoUrl={job.video_url} />
       ) : (
         <PipelineTrace events={allEvents} job={job} />
       )}

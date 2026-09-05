@@ -42,7 +42,7 @@ DEFAULT_PROVIDER: Provider = os.environ.get("LLM_PROVIDER", "groq")  # type: ign
 # var or the `model` constructor argument for anyone using a paid tier or
 # a different model on the same provider.
 DEFAULT_MODELS: dict[Provider, str] = {
-    "groq": "llama-3.3-70b-versatile",
+    "groq": "openai/gpt-oss-120b",
     "gemini": "gemini-2.0-flash",
     "anthropic": "claude-sonnet-4-6",
 }
