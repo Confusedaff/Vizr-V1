@@ -6,6 +6,8 @@ template gets it for free rather than each one remembering to call it.
 """
 from __future__ import annotations
 
+from pathlib import Path
+
 from manim import Scene
 
 from manim_engine.components.common.caption_bar import CaptionBar
@@ -24,6 +26,11 @@ class BaseVisualizationScene(Scene):
     """
 
     scene_data = None  # set externally by the compiler before .render()
+    # narration text -> pre-synthesized mp3 path (see
+    # workers/renderer/pipeline/audio.py); also set externally by the
+    # compiler. Empty by default so scenes render silently (captions
+    # only) when narration audio wasn't generated or is disabled.
+    audio_map: dict[str, str] = {}
 
     def construct(self):
         self.camera.background_color = COLOR_BACKGROUND
@@ -69,6 +76,23 @@ class BaseVisualizationScene(Scene):
                 self.construction_warnings.append(issue.message)
 
     def narrate(self, text: str):
+        """Sets the on-screen caption and, when a pre-synthesized voice
+        clip exists for this exact text, schedules it to play alongside
+        it via Manim's own audio mixer (Scene.add_sound mixes straight
+        into the rendered movie file — no separate muxing step needed).
+
+        time_offset=0 means "starting now" — add_sound schedules relative
+        to the scene's *current* elapsed time, not absolute zero, so this
+        lines the clip up with the caption's fade-in regardless of how
+        far into the scene this call happens.
+
+        Falls back to caption-only (no exception, no audio) whenever
+        audio_map has no entry for this text or TTS was disabled/failed
+        for this line — see workers/renderer/pipeline/audio.py.
+        """
+        audio_path = self.audio_map.get(text) if self.audio_map else None
+        if audio_path and Path(audio_path).exists():
+            self.add_sound(audio_path, time_offset=0)
         return self.caption_bar.set_caption(text)
 
     def safe_play(self, *animations) -> None:

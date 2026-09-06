@@ -2,9 +2,9 @@
 Granular per-stage debuggability.
 
 Every pipeline stage (classify -> plan_scene -> validate_scene ->
-generate_code -> validate_code -> render -> validate_render -> upload)
-writes its inputs, outputs, timing, and any error through a StageLogger
-into a per-job debug directory:
+generate_code -> validate_code -> audio -> render -> validate_render ->
+upload) writes its inputs, outputs, timing, and any error through a
+StageLogger into a per-job debug directory:
 
     debug_runs/{job_id}/
       00_classify/{input.json, output.json, meta.json}
@@ -12,16 +12,17 @@ into a per-job debug directory:
       02_validate_scene/{input.json, output.json, meta.json}
       03_generate_code/{input.json, output.py, meta.json}
       04_validate_code/{input.json, output.json, meta.json}
-      05_render/{scene.py, stdout.log, stderr.log, meta.json, video.mp4}
-      06_validate_render/{report.json, worst_frames/*.png, meta.json}
-      07_upload/{meta.json}
+      05_audio/{output.json, *.mp3, meta.json}
+      06_render/{scene.py, stdout.log, stderr.log, meta.json, video.mp4}
+      07_validate_render/{report.json, worst_frames/*.png, meta.json}
+      08_upload/{meta.json}
       manifest.json                 <- RenderManifest, see manifest.py
       pipeline.log                  <- structured JSON lines, all stages
 
 This means: "the frame quality is low" is never a dead end. You can go to
-debug_runs/{job_id}/06_validate_render/report.json, see exactly which
+debug_runs/{job_id}/07_validate_render/report.json, see exactly which
 frames failed which checks, open worst_frames/*.png, then go to
-05_render/scene.py to see the exact generated Manim code that produced
+06_render/scene.py to see the exact generated Manim code that produced
 them, and 02_validate_scene/output.json to see the scene graph that code
 was generated from. Every layer is independently inspectable.
 
@@ -50,9 +51,10 @@ STAGE_DIR_NAMES = {
     "validate_scene": "02_validate_scene",
     "generate_code": "03_generate_code",
     "validate_code": "04_validate_code",
-    "render": "05_render",
-    "validate_render": "06_validate_render",
-    "upload": "07_upload",
+    "audio": "05_audio",
+    "render": "06_render",
+    "validate_render": "07_validate_render",
+    "upload": "08_upload",
 }
 
 

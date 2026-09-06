@@ -30,6 +30,7 @@ from manim_engine.debug.stage_logger import StageLogger
 from manim_engine.renderer.config import RENDERER_VERSION
 from manim_engine.renderer.validate_render import validate_render
 from workers.renderer.llm.client import LLMClient
+from workers.renderer.pipeline.audio import generate_narration_audio
 from workers.renderer.pipeline.classify import (
     ClassificationResult,
     NeedsManualInput,
@@ -203,12 +204,36 @@ def _attempt_repair_and_continue(
 
 
 def _render_and_validate(*, scene: Scene, logger: StageLogger, manifest: RenderManifest, resolution) -> PipelineResult:
+    # -- Stage: audio (narration text-to-speech) -------------------------
+    # Runs before render and outside any sandbox: edge-tts needs network
+    # access that the Docker sandbox (SANDBOX_MODE=docker) deliberately
+    # denies the render step itself. Never fatal — a TTS hiccup degrades
+    # to the pipeline's pre-existing behavior (captions, no audio), it
+    # never fails the job.
+    audio_stage = logger.stage("audio")
+    audio_timing = manifest.start_stage("audio")
+    audio_result = generate_narration_audio(scene, output_dir=audio_stage.stage_dir)
+    audio_stage.write_output({
+        "voice": audio_result.voice,
+        "lines_synthesized": len(audio_result.audio_map),
+        "lines_requested": len(audio_result.audio_map) + len(audio_result.errors),
+        "errors": audio_result.errors,
+    })
+    manifest.finish_stage(audio_timing, success=True)
+    audio_stage.finalize(success=True)
+    logger.stage_finished("audio", success=True)
+    if audio_result.errors:
+        manifest.add_note(
+            f"narration audio: {len(audio_result.errors)} line(s) failed to synthesize, "
+            "continuing with captions only for those lines"
+        )
+
     # -- Stage: render --------------------------------------------------
     stage = logger.stage("render")
     stage.write_input(scene.model_dump(mode="json"))
     timing = manifest.start_stage("render")
 
-    render_kwargs = {}
+    render_kwargs = {"audio_map": audio_result.audio_map}
     if resolution:
         render_kwargs["resolution"] = resolution
 

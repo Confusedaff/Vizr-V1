@@ -37,6 +37,13 @@ def main() -> int:
     width = int(scene_json.pop("__render_width", 1920))
     height = int(scene_json.pop("__render_height", 1080))
     fps = int(scene_json.pop("__render_fps", 30))
+    # Narration text -> path, relative to /input (see sandbox.py, which
+    # copies the clips there since this container has no network of its
+    # own to synthesize them with). Resolve back to absolute paths here.
+    audio_map = {
+        text: str(INPUT_SCENE_PATH.parent / rel)
+        for text, rel in scene_json.pop("__audio_map", {}).items()
+    }
 
     config.pixel_width = width
     config.pixel_height = height
@@ -50,7 +57,7 @@ def main() -> int:
         from manim_engine.renderer.compiler import scene_to_manim
 
         scene = Scene(**scene_json)
-        manim_scene = scene_to_manim(scene)
+        manim_scene = scene_to_manim(scene, audio_map=audio_map)
         manim_scene.render()
 
         video_path = str(manim_scene.renderer.file_writer.movie_file_path)

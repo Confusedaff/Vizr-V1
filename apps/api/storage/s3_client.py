@@ -6,7 +6,7 @@ just changing S3_ENDPOINT_URL/credentials, since MinIO implements the S3
 API.
 
 Design: videos are rendered to local/volume disk first
-(debug_runs/{job_id}/05_render/media/...), then uploaded here as a
+(debug_runs/{job_id}/06_render/media/...), then uploaded here as a
 distinct pipeline step. This keeps the render path free of network
 dependencies (a render that succeeds shouldn't fail the job just because
 object storage had a hiccup — that's a distinct, separately-retryable

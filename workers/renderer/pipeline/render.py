@@ -55,8 +55,9 @@ from packages.scene_schema import Scene
 from manim_engine.renderer.compiler import scene_to_manim
 
 scene_json = json.loads({scene_json_repr})
+audio_map = json.loads({audio_map_json_repr})
 scene = Scene(**scene_json)
-manim_scene = scene_to_manim(scene)
+manim_scene = scene_to_manim(scene, audio_map=audio_map)
 manim_scene.render()
 
 result = {{
@@ -87,10 +88,15 @@ def render_scene(
     resolution: tuple[int, int] = RENDER_RESOLUTION,
     fps: int = RENDER_FPS,
     timeout_seconds: int = 180,
+    audio_map: dict[str, str] | None = None,
 ) -> RenderStageResult:
+    """`audio_map` (narration text -> mp3 file path, from
+    workers/renderer/pipeline/audio.py) is optional; omitted or empty
+    renders exactly as before this feature existed (captions, no audio)."""
     if SANDBOX_MODE == "docker":
         sandboxed_result = _try_render_scene_docker(
-            scene, output_dir=output_dir, resolution=resolution, fps=fps, timeout_seconds=timeout_seconds
+            scene, output_dir=output_dir, resolution=resolution, fps=fps,
+            timeout_seconds=timeout_seconds, audio_map=audio_map,
         )
         if sandboxed_result is not None:
             return sandboxed_result
@@ -99,11 +105,13 @@ def render_scene(
     return _render_scene_subprocess(
         scene, output_dir=output_dir, project_root=project_root,
         resolution=resolution, fps=fps, timeout_seconds=timeout_seconds,
+        audio_map=audio_map,
     )
 
 
 def _try_render_scene_docker(
     scene: Scene, *, output_dir: Path, resolution: tuple[int, int], fps: int, timeout_seconds: int,
+    audio_map: dict[str, str] | None = None,
 ) -> RenderStageResult | None:
     """Returns None (signaling "fall back to subprocess") if the sandbox
     image isn't available; otherwise always returns a RenderStageResult
@@ -114,6 +122,7 @@ def _try_render_scene_docker(
         sandbox_result = render_scene_sandboxed(
             scene.model_dump(mode="json"), output_dir=output_dir,
             resolution=resolution, fps=fps, timeout_seconds=timeout_seconds,
+            audio_map=audio_map,
         )
     except SandboxUnavailableError as e:
         import logging
@@ -144,10 +153,15 @@ def _render_scene_subprocess(
     resolution: tuple[int, int] = RENDER_RESOLUTION,
     fps: int = RENDER_FPS,
     timeout_seconds: int = 180,
+    audio_map: dict[str, str] | None = None,
 ) -> RenderStageResult:
     output_dir.mkdir(parents=True, exist_ok=True)
     media_dir = output_dir / "media"
 
+    # Subprocess mode shares the host filesystem (see module docstring),
+    # so audio_map's paths — already absolute, written by the audio stage
+    # onto this same host — can be passed straight through with no
+    # copying, unlike the sandboxed path in sandbox.py.
     script = _RENDER_SUBPROCESS_TEMPLATE.format(
         project_root=str(project_root),
         width=resolution[0],
@@ -155,6 +169,7 @@ def _render_scene_subprocess(
         fps=fps,
         media_dir=str(media_dir),
         scene_json_repr=repr(json.dumps(scene.model_dump(mode="json"))),
+        audio_map_json_repr=repr(json.dumps(audio_map or {})),
     )
     script_path = output_dir / "render_scene.py"
     script_path.write_text(script)

@@ -53,7 +53,7 @@ async def list_stages(
 ) -> dict:
     """Lists every stage directory and its files — the filesystem-level
     view of debug_runs/{job_id}/, useful for a UI that wants to let a
-    developer drill into e.g. 05_render/stderr.log directly."""
+    developer drill into e.g. 06_render/stderr.log directly."""
     await _check_job_ownership(job_id, current_user, db)
     job_dir = DEBUG_RUNS_ROOT / job_id
     if not job_dir.exists():
@@ -95,7 +95,7 @@ async def get_quality_report(
     job_id: str, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)
 ) -> dict:
     await _check_job_ownership(job_id, current_user, db)
-    path = DEBUG_RUNS_ROOT / job_id / "06_validate_render" / "report.json"
+    path = DEBUG_RUNS_ROOT / job_id / "07_validate_render" / "report.json"
     if not path.exists():
         raise HTTPException(404, "No quality report found for this job")
     import json

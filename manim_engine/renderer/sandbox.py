@@ -119,7 +119,13 @@ def render_scene_sandboxed(
     resolution: tuple[int, int] = (1920, 1080),
     fps: int = 30,
     timeout_seconds: int = 180,
+    audio_map: dict[str, str] | None = None,
 ) -> SandboxRenderResult:
+    """`audio_map` (narration text -> mp3 file path on the *host*, from
+    workers/renderer/pipeline/audio.py) is copied into the read-only
+    /input mount below, since the sandbox container has no network
+    (`--network none`) and so cannot reach edge-tts's endpoint itself —
+    TTS synthesis always happens on the host, before this function runs."""
     output_dir.mkdir(parents=True, exist_ok=True)
 
     if not check_sandbox_available():
@@ -131,11 +137,29 @@ def render_scene_sandboxed(
         )
 
     input_dir = Path(tempfile.mkdtemp(prefix="vizr-sandbox-input-"))
+
+    # Copy narration clips into the input mount and rewrite the map to
+    # the container-relative paths sandbox_entrypoint.py will resolve
+    # against /input — the host paths in `audio_map` mean nothing inside
+    # the container's own filesystem.
+    container_audio_map: dict[str, str] = {}
+    if audio_map:
+        audio_dir = input_dir / "audio"
+        audio_dir.mkdir(exist_ok=True)
+        for i, (text, host_path) in enumerate(audio_map.items()):
+            src = Path(host_path)
+            if not src.exists():
+                continue
+            dest_name = f"{i}{src.suffix or '.mp3'}"
+            shutil.copyfile(src, audio_dir / dest_name)
+            container_audio_map[text] = f"audio/{dest_name}"
+
     scene_with_render_opts = {
         **scene_dict,
         "__render_width": resolution[0],
         "__render_height": resolution[1],
         "__render_fps": fps,
+        "__audio_map": container_audio_map,
     }
     (input_dir / "scene.json").write_text(json.dumps(scene_with_render_opts))
 

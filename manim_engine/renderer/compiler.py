@@ -49,15 +49,21 @@ class UnknownVisualizationTypeError(Exception):
     pass
 
 
-def scene_to_manim(scene: Scene):
+def scene_to_manim(scene: Scene, audio_map: dict[str, str] | None = None):
     """Returns an *instance* of the appropriate Manim Scene subclass, with
-    `scene_data` already attached, ready to `.render()`.
+    `scene_data` (and, optionally, `audio_map`) already attached, ready to
+    `.render()`.
 
-    Note: we attach scene_data to the *class* via a per-call dynamic
-    subclass rather than the instance, because Manim's CLI/renderer
-    machinery in some code paths re-reads class-level state. Using a
-    fresh dynamic subclass per call also means concurrent renders (e.g.
-    two workers rendering different jobs in the same process during
+    `audio_map` maps narration text -> a pre-synthesized mp3 file path
+    (see workers/renderer/pipeline/audio.py). It's optional and defaults
+    to empty: every template's self.narrate() call degrades gracefully to
+    caption-only when a piece of text has no corresponding entry.
+
+    Note: we attach scene_data (and audio_map) to the *class* via a
+    per-call dynamic subclass rather than the instance, because Manim's
+    CLI/renderer machinery in some code paths re-reads class-level state.
+    Using a fresh dynamic subclass per call also means concurrent renders
+    (e.g. two workers rendering different jobs in the same process during
     tests) never share mutable class state.
     """
     template_cls = TEMPLATE_REGISTRY.get(scene.visualization_type)
@@ -70,6 +76,6 @@ def scene_to_manim(scene: Scene):
     dynamic_cls = type(
         f"{template_cls.__name__}_Bound",
         (template_cls,),
-        {"scene_data": scene},
+        {"scene_data": scene, "audio_map": audio_map or {}},
     )
     return dynamic_cls()

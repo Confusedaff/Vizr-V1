@@ -312,6 +312,7 @@ perfectly good video file.
 | 14 algorithm templates | ✅ all render end-to-end, pass frame-quality gates |
 | Schema-driven rendering (no LLM code-gen) | ✅ |
 | Frame-quality debugging (blank/clipping/contrast/overlap) | ✅ |
+| Spoken narration audio (English TTS, mixed into the MP4) | ✅ via edge-tts — free, no API key; degrades to captions-only if unreachable |
 | Granular per-stage debug artifacts | ✅ |
 | JWT auth, per-user job isolation | ✅ |
 | S3/MinIO video storage | ✅ (tested against mocked S3; live MinIO needs a real run) |
@@ -814,9 +815,10 @@ flowchart TD
 
 ### Longer-term / exploratory
 
-- **Multi-language narration** — text-to-speech narration tracks in
-  languages beyond English, paired with a translated UI (a real i18n
-  layer, not just hardcoded strings).
+- **Multi-language narration** — spoken narration now ships (English,
+  via edge-tts — see `workers/renderer/pipeline/audio.py`); extending it
+  to other languages just means picking a per-language voice, paired
+  with a translated UI (a real i18n layer, not just hardcoded strings).
 - **User-uploaded custom components** — a plugin surface for someone to
   register their own Manim component (beyond the built-in
   `ArrayVisualizer`/`TreeVisualizer`/etc. set) without forking the

@@ -10,6 +10,8 @@ Bump RENDERER_VERSION whenever a change here would visibly change output
 """
 from __future__ import annotations
 
+import os
+
 RENDERER_VERSION = "1.0.0"
 
 # --------------------------------------------------------------------------
@@ -92,3 +94,18 @@ PREVIEW_RESOLUTION = (854, 480)   # fast local iteration (-ql equivalent)
 
 MIN_VIDEO_DURATION_S = 1.0
 MAX_VIDEO_DURATION_S = 90.0
+
+# --------------------------------------------------------------------------
+# Narration audio (text-to-speech) — see workers/renderer/pipeline/audio.py
+# --------------------------------------------------------------------------
+
+# edge-tts wraps Microsoft Edge's "Read Aloud" neural voices: free, no API
+# key/signup/billing, and considerably more natural than offline engines
+# like espeak/pyttsx3 — at the cost of needing outbound network access,
+# which is why the audio stage runs on the worker host *before* the
+# (network-less, when SANDBOX_MODE=docker) render step, not inside it.
+TTS_ENABLED = os.environ.get("TTS_ENABLED", "true").strip().lower() not in ("false", "0", "")
+# Any edge-tts neural voice name works here; run `edge-tts --list-voices`
+# for the full catalog across languages/accents. This one is a natural-
+# sounding, general-purpose US English voice.
+TTS_VOICE = os.environ.get("TTS_VOICE", "en-US-AriaNeural")
