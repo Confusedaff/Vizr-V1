@@ -42,7 +42,16 @@ COPY requirements.txt .
 # surface (a render process has no business making an S3 call itself;
 # that happens after the sandboxed process exits and the video file is
 # handed back to the uploading worker).
-RUN pip install --no-cache-dir manim==0.21.0 pydantic==2.13.4 numpy==2.4.4
+#
+# --timeout/--retries guard against PyPI read stalls on the big transitive
+# wheels (scipy, av) — a single slow chunk shouldn't fail the whole build.
+# numpy/pydantic are split into their own layer so a flaky manim/scipy
+# download doesn't force redownloading everything on a rebuild retry.
+ENV PIP_DEFAULT_TIMEOUT=100
+RUN pip install --no-cache-dir --retries 10 --timeout 100 \
+    pydantic==2.13.4 numpy==2.4.4
+RUN pip install --no-cache-dir --retries 10 --timeout 100 \
+    manim==0.21.0
 
 COPY packages/ ./packages/
 COPY manim_engine/ ./manim_engine/
